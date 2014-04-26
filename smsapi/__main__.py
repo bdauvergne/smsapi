@@ -3,6 +3,7 @@ from .ovh import OVH
 if __name__ == '__main__':
     import argparse
     import sys
+    import json
 
     carriers = {
             'ovh': OVH,
@@ -17,6 +18,7 @@ if __name__ == '__main__':
     kwargs = dict(param.split('=', 1) for param in args.params)
     carrier = carriers[args.carrier](**kwargs)
     content = sys.stdin.read()
-    carrier.send_sms(args.to, content)
+    response = carrier.send_sms(args.to, content)
+    print json.dumps(response, indent=4)
 
 
