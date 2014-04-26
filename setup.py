@@ -30,7 +30,7 @@ class TestCommand(Command):
         t.run(tests)
 
 setup(name='smsapi',
-        version='0.9.0',
+        version='0.10.0',
         license='MIT',
         description='Use online API to send SMS',
         author='Benjamin Dauvergne',
