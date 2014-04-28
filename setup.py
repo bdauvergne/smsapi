@@ -29,8 +29,14 @@ class TestCommand(Command):
         t = TextTestRunner(verbosity = 4)
         t.run(tests)
 
+def get_version():
+    import re
+
+    content = file('smsapi/__init__.py').read()
+    return re.search(r"__VERSION__ *= *'(.*)'", content).group(1)
+
 setup(name='smsapi',
-        version='0.10.0',
+        version=get_version(),
         license='MIT',
         description='Use online API to send SMS',
         author='Benjamin Dauvergne',
