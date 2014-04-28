@@ -1,24 +1,18 @@
 import logging
 import requests
+import datetime
+
+from . import utils
 
 log = logging.getLogger(__name__)
 
 URL = 'https://www.ovh.com/cgi-bin/sms/http2sms.cgi'
 SMS_CLASS = 1
 
-def is_int_phone_number(phone_number):
-    if not phone_number.startswith('+'):
-        return False
-    if not phone_number[1:].isdigit():
-        return False
-    return True
-
-class OVHError(object):
-    pass
-
 class OVH(object):
     def __init__(self, account, login, password, sms_from='', url=URL,
             sms_class=SMS_CLASS, no_stop=None, tag=None, deferred=None):
+        assert deferred  is None or isinstance(deferred, datetime.datetime)
         self.url = url
         self.sms_class = sms_class
         self.account = account
@@ -33,7 +27,7 @@ class OVH(object):
         sms_class = sms_class or self.sms_class
         message = unicode(message).encode('utf-8')
         to = list(to)
-        if not all(map(is_int_phone_number, to)):
+        if not all(map(utils.is_int_phone_number, to)):
             raise ValueError('to must a list of phone '
                     'number using the international format')
         params = {
@@ -52,15 +46,21 @@ class OVH(object):
             params['tag'] = self.tag[:20]
         if self.deferred:
             params['deferred'] = self.deferred.strftime('%H%M%d%m%Y')
-        response = requests.get(self.url, params=params)
-        result = response.json()
+        try:
+            response = requests.get(self.url, params=params)
+        except Exception, e:
+            raise utils.SMSError('unable to request %r' % self.url, e)
+        try:
+            result = response.json()
+        except Exception, e:
+            raise utils.SMSError('response is not JSON', e)
         status = result['status']
         if status >= 200:
             if status == 201:
-                raise OVHError('missing parameter', result)
+                raise utils.SMSError('missing parameter', result)
             if status == 202:
-                raise OVHError('invalid parameter', result)
+                raise utils.SMSError('invalid parameter', result)
             if status == 401:
-                raise OVHError('ip not authorized', result)
-            raise OVHError('unknown error', result)
+                raise utils.SMSError('ip not authorized', result)
+            raise utils.SMSError('unknown error', result)
         return result

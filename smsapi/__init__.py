@@ -1,3 +1,5 @@
 from .ovh import OVH
-__ALL__ = ['OVH']
+from .utils import SMSError
+
+__ALL__ = ['OVH', 'SMSError']
 __VERSION__ = '0.10.0'
