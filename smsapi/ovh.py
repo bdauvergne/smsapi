@@ -23,8 +23,11 @@ class OVH(object):
         self.deferred = deferred
         self.tag = tag
 
-    def send_sms(self, to, message, sms_class=None):
+    def send_sms(self, to, message, sms_class=None, no_stop=None, tag=None, deferred=None):
         sms_class = sms_class or self.sms_class
+        no_stop = no_stop if no_stop is not None else self.no_stop
+        tag = tag or self.tag
+        deferred = deferred if deferred is not None else self.deferred
         message = unicode(message).encode('utf-8')
         to = list(to)
         if not all(map(utils.is_int_phone_number, to)):
@@ -40,12 +43,12 @@ class OVH(object):
           'contentType': 'text/json',
           'class': sms_class,
         }
-        if self.no_stop:
+        if no_stop:
             params['noStop'] = 1
-        if self.tag:
-            params['tag'] = self.tag[:20]
-        if self.deferred:
-            params['deferred'] = self.deferred.strftime('%H%M%d%m%Y')
+        if tag:
+            params['tag'] = tag[:20]
+        if deferred is not None:
+            params['deferred'] = deferred.strftime('%H%M%d%m%Y')
         try:
             response = requests.get(self.url, params=params)
         except Exception, e:
