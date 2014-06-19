@@ -65,5 +65,5 @@ class OVH(object):
                 raise utils.SMSError('invalid parameter', result)
             if status == 401:
                 raise utils.SMSError('ip not authorized', result)
-            raise utils.SMSError('unknown error', result)
+            raise utils.SMSError('unqualified error', result)
         return result
